@@ -1,74 +1,213 @@
-/*=============== SHOW MENU ===============*/
-const showMenu = (toggleId, navId) =>{
-   const toggle = document.getElementById(toggleId),
-         nav = document.getElementById(navId)
+/**
+* Template Name: UpConstruction
+* Updated: Mar 10 2023 with Bootstrap v5.2.3
+* Template URL: https://bootstrapmade.com/upconstruction-bootstrap-construction-website-template/
+* Author: BootstrapMade.com
+* License: https://bootstrapmade.com/license/
+*/
+document.addEventListener('DOMContentLoaded', () => {
+  "use strict";
 
-   toggle.addEventListener('click', () =>{
-       // Agregar clase show-menu a nav menu
-       nav.classList.toggle('show-menu')
-       // Agregar show-icon para mostrar y ocultar el icono del menú
-       toggle.classList.toggle('show-icon')
-   })
-}
+  /**
+   * Preloader
+   */
+  const preloader = document.querySelector('#preloader');
+  if (preloader) {
+    window.addEventListener('load', () => {
+      preloader.remove();
+    });
+  }
 
-showMenu('nav-toggle','nav-menu')
+  /**
+   * Mobile nav toggle
+   */
 
-/*=============== SHOW DROPDOWN MENU ===============*/
-const dropdownItems = document.querySelectorAll('.dropdown__item')
+  const mobileNavShow = document.querySelector('.mobile-nav-show');
+  const mobileNavHide = document.querySelector('.mobile-nav-hide');
 
-// 1. Selecionar cada dropdown item
-dropdownItems.forEach((item) =>{
-    const dropdownButton = item.querySelector('.dropdown__button') 
-
-    // 2. Selecionar cada click del botón
-    dropdownButton.addEventListener('click', () =>{
-        // 7. Seleccionar la clase show-dropdown actual
-        const showDropdown = document.querySelector('.show-dropdown')
-        
-        // 5. Llamar a la funcion toggleItem
-        toggleItem(item)
-
-        // 8. Remover la clase show-dropdown de otros items
-        if(showDropdown && showDropdown!== item){
-            toggleItem(showDropdown)
-        }
+  document.querySelectorAll('.mobile-nav-toggle').forEach(el => {
+    el.addEventListener('click', function(event) {
+      event.preventDefault();
+      mobileNavToogle();
     })
-})
+  });
 
-// 3. Crear una función para mostrar el dropdown
-const toggleItem = (item) =>{
-    // 3.1. Selecionar cada dropdown content
-    const dropdownContainer = item.querySelector('.dropdown__container')
+  function mobileNavToogle() {
+    document.querySelector('body').classList.toggle('mobile-nav-active');
+    mobileNavShow.classList.toggle('d-none');
+    mobileNavHide.classList.toggle('d-none');
+  }
 
-    // 6. Si el mismo item contiene la clase show-dropdown, remover
-    if(item.classList.contains('show-dropdown')){
-        dropdownContainer.removeAttribute('style')
-        item.classList.remove('show-dropdown')
-    } else{
-        // 4. Agregar el height maximo al dropdown content y agregar la clase show-dropdown
-        dropdownContainer.style.height = dropdownContainer.scrollHeight + 'px'
-        item.classList.add('show-dropdown')
+  /**
+   * Hide mobile nav on same-page/hash links
+   */
+  document.querySelectorAll('#navbar a').forEach(navbarlink => {
+
+    if (!navbarlink.hash) return;
+
+    let section = document.querySelector(navbarlink.hash);
+    if (!section) return;
+
+    navbarlink.addEventListener('click', () => {
+      if (document.querySelector('.mobile-nav-active')) {
+        mobileNavToogle();
+      }
+    });
+
+  });
+
+  /**
+   * Toggle mobile nav dropdowns
+   */
+  const navDropdowns = document.querySelectorAll('.navbar .dropdown > a');
+
+  navDropdowns.forEach(el => {
+    el.addEventListener('click', function(event) {
+      if (document.querySelector('.mobile-nav-active')) {
+        event.preventDefault();
+        this.classList.toggle('active');
+        this.nextElementSibling.classList.toggle('dropdown-active');
+
+        let dropDownIndicator = this.querySelector('.dropdown-indicator');
+        dropDownIndicator.classList.toggle('bi-chevron-up');
+        dropDownIndicator.classList.toggle('bi-chevron-down');
+      }
+    })
+  });
+
+  /**
+   * Scroll top button
+   */
+  const scrollTop = document.querySelector('.scroll-top');
+  if (scrollTop) {
+    const togglescrollTop = function() {
+      window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
     }
-}
+    window.addEventListener('load', togglescrollTop);
+    document.addEventListener('scroll', togglescrollTop);
+    scrollTop.addEventListener('click', window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    }));
+  }
 
-/*=============== DELETE DROPDOWN STYLES ===============*/
-const mediaQuery = matchMedia('(min-width: 1118px)'),
-      dropdownContainer = document.querySelectorAll('.dropdown__container')
+  /**
+   * Initiate glightbox
+   */
+  const glightbox = GLightbox({
+    selector: '.glightbox'
+  });
 
-// Función para eliminar estilos desplegables en modo móvil cuando el navegador cambia de tamaño
-const removeStyle = () =>{
-    // Validar si la media query llega a 1118px
-    if(mediaQuery.matches){
-        // Removemos el estilo de height de dropdown container
-        dropdownContainer.forEach((e) =>{
-            e.removeAttribute('style')
-        })
+  /**
+   * Porfolio isotope and filter
+   */
+  let portfolionIsotope = document.querySelector('.portfolio-isotope');
 
-        // Removemos la clase show-dropdown de dropdown item
-        dropdownItems.forEach((e) =>{
-            e.classList.remove('show-dropdown')
-        })
+  if (portfolionIsotope) {
+
+    let portfolioFilter = portfolionIsotope.getAttribute('data-portfolio-filter') ? portfolionIsotope.getAttribute('data-portfolio-filter') : '*';
+    let portfolioLayout = portfolionIsotope.getAttribute('data-portfolio-layout') ? portfolionIsotope.getAttribute('data-portfolio-layout') : 'masonry';
+    let portfolioSort = portfolionIsotope.getAttribute('data-portfolio-sort') ? portfolionIsotope.getAttribute('data-portfolio-sort') : 'original-order';
+
+    window.addEventListener('load', () => {
+      let portfolioIsotope = new Isotope(document.querySelector('.portfolio-container'), {
+        itemSelector: '.portfolio-item',
+        layoutMode: portfolioLayout,
+        filter: portfolioFilter,
+        sortBy: portfolioSort
+      });
+
+      let menuFilters = document.querySelectorAll('.portfolio-isotope .portfolio-flters li');
+      menuFilters.forEach(function(el) {
+        el.addEventListener('click', function() {
+          document.querySelector('.portfolio-isotope .portfolio-flters .filter-active').classList.remove('filter-active');
+          this.classList.add('filter-active');
+          portfolioIsotope.arrange({
+            filter: this.getAttribute('data-filter')
+          });
+          if (typeof aos_init === 'function') {
+            aos_init();
+          }
+        }, false);
+      });
+
+    });
+
+  }
+
+  /**
+   * Init swiper slider with 1 slide at once in desktop view
+   */
+  new Swiper('.slides-1', {
+    speed: 600,
+    loop: true,
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false
+    },
+    slidesPerView: 'auto',
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
     }
-}
+  });
 
-addEventListener('resize', removeStyle)
+  /**
+   * Init swiper slider with 2 slides at once in desktop view
+   */
+  new Swiper('.slides-2', {
+    speed: 600,
+    loop: true,
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false
+    },
+    slidesPerView: 'auto',
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+    breakpoints: {
+      320: {
+        slidesPerView: 1,
+        spaceBetween: 20
+      },
+
+      1200: {
+        slidesPerView: 2,
+        spaceBetween: 20
+      }
+    }
+  });
+
+  /**
+   * Initiate pURE cOUNTER
+   */
+  new PureCounter();
+
+  /**
+   * Animation on scroll function and init
+   */
+  function aos_init() {
+    AOS.init({
+      duration: 800,
+      easing: 'slide',
+      once: true,
+      mirror: false
+    });
+  }
+  window.addEventListener('load', () => {
+    aos_init();
+  });
+
+});
